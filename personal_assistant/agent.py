@@ -9,7 +9,7 @@ weather_intel_tool = FunctionTool(fetch_weather_summary)
 safety_intel_tool = FunctionTool(fetch_safety_brief)
 
 weather_data_agent = Agent(
-    model='gemini-2.5-flash',
+    model='gemini-2.5-flash-lite',
     name='weather_data_agent',
     description='Retrieves structured weather data for downstream reasoning.',
     instruction=(
@@ -27,11 +27,12 @@ weather_agent = Agent(
     name='weather_intel_agent',
     description='Weather intelligence analyst for trip planning.',
     instruction=(
-        "You are responsible for gathering weather intelligence for trip plans.\n"
+        "You are responsible for gathering weather intelligence for trip plans with an Indian traveller in mind.\n"
         "- Use the structured weather data provided by `weather_data_agent` along with user context.\n"
         "- Focus on the travel dates or trip length provided.\n"
         "- Translate raw data into actionable guidance: packing tips, risky weather windows, "
-        "and timing suggestions.\n"
+        "and timing suggestions, noting how conditions compare to typical Indian climates so the traveller "
+        "can adapt clothing or gear.\n"
         "- Raise flags for severe weather, storms, heat waves, or precipitation spikes.\n"
         "- Return concise bullet points grouped by `Current`, `Daily Outlook`, and `Implications`.\n"
         "- Once your analysis is complete, call `transfer_to_agent` to hand control back to "
@@ -55,7 +56,7 @@ safety_agent = Agent(
 )
 
 local_news_fetch_agent = Agent(
-    model='gemini-2.5-flash',
+    model='gemini-2.5-flash-lite',
     name='local_news_fetch_agent',
     description='Fetches recent news headlines for the destination.',
     instruction=(
@@ -82,7 +83,7 @@ local_news_agent = Agent(
 )
 
 trip_planner_agent = Agent(
-    model='gemini-2.5-pro',
+    model='gemini-2.5-flash',
     name='trip_planner_agent',
     description='Designs itineraries before, during, and after the trip.',
     instruction=(
@@ -90,24 +91,30 @@ trip_planner_agent = Agent(
         "- Structure the output with sections: `Before Departure`, `During Trip`, `After Return`.\n"
         "- Tailor recommendations to the trip length (weekend, short, long) and user preferences.\n"
         "- Integrate weather alerts and safety advisories into scheduling and packing guidance.\n"
-        "- Suggest logistics (transport, lodging checks, reservations) and enrichment ideas.\n"
+        "- Suggest logistics (transport, lodging checks, reservations) and enrichment ideas with an Indian "
+        "traveller lens: reference INR price bands, popular Indian payment options, and domestic carriers "
+        "or visa needs when heading abroad.\n"
         "- Highlight contingency plans or alternative activities when needed.\n"
         "- Prepare concise notes for: packing checklist, travel routes from the origin, must-see landmarks, "
-        "baseline budget ranges, and legal or documentation requirements.\n"
+        "baseline budget ranges (in INR with rough conversions if overseas), and legal or documentation "
+        "requirements.\n"
         "- After you have drafted the trip blueprint, call `transfer_to_agent` to return control to "
         "`travel_orchestrator` for the final synthesis."
     ),
 )
 
 root_agent = Agent(
-    model='gemini-2.5-pro',
+    model='gemini-2.5-flash',
     name='travel_orchestrator',
     description='Coordinates specialized agents to deliver full travel plans.',
     instruction=(
-        "You are the personal travel assistant orchestrator.\n"
+        "You are the personal travel assistant orchestrator for Indian travellers.\n"
         "Workflow:\n"
-        "1. Gather clarifying details (destination, travel dates/length, travelers, preferences). "
-        "Ask follow-up questions once if critical information is missing.\n"
+        "1. Gather clarifying details (traveller home city and state, destination interest, travel dates/length, "
+        "travellers, preferences, budget in INR). Always confirm whether the user wants ideas in their current "
+        "location or is planning to travel elsewhere; if they do not specify a destination, offer both local "
+        "and getaway options starting from their Indian location. Ask follow-up questions once if critical "
+        "information is missing.\n"
         "2. Delegate to `weather_data_agent` to obtain structured meteorological data.\n"
         "3. Delegate to `weather_intel_agent` to translate that data into implications.\n"
         "4. Delegate to `local_news_fetch_agent` to gather recent incident headlines.\n"
@@ -120,13 +127,15 @@ root_agent = Agent(
         "   • Packing guidance highlighting what to take.\n"
         "   • Primary travel route from the stated origin to the destination.\n"
         "   • Must-visit attractions or experiences.\n"
-        "   • Rough budget expectations (e.g., transport, lodging, daily spend).\n"
-        "   • Legal or regulatory requirements (visas, permits, local laws).\n"
+        "   • Rough budget expectations in INR (add secondary currency only when relevant).\n"
+        "   • Legal or regulatory requirements (visas, permits, local laws) with emphasis on Indian documentation "
+        "needs for outbound trips.\n"
         "Follow this sequence strictly: call `transfer_to_agent` to `weather_data_agent`, then "
         "`weather_intel_agent`, `local_news_fetch_agent`, `local_news_safety_agent`, `safety_watch_agent`, "
         "and finally `trip_planner_agent`. Provide each agent with the distilled context they need. After each "
         "agent finishes and returns control, continue orchestrating the next step.\n"
-        "Ensure each sub-agent is invoked when their expertise is needed. "
+        "Ensure each sub-agent is invoked when their expertise is needed and that insights remain relatable "
+        "for Indian travellers (cuisine notes, cultural norms, payment modes, and logistics from India).\n"
         "Do not produce the final plan until the trip planner agent has responded."
     ),
     sub_agents=[

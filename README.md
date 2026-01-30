@@ -1,7 +1,9 @@
 # AI Trip Planner – Google ADK
 
-This project implements a multi-agent travel planning assistant using the Google Agent Development Kit (ADK).  
-The orchestrator, `travel_orchestrator`, coordinates a series of specialised agents that research weather, safety, and logistics before producing a structured trip brief for the user.
+This project implements two demo assistants using the Google Agent Development Kit (ADK).
+
+- `personal_assistant/travel_orchestrator` (multi-stage travel planner) coordinates weather, safety, and itinerary specialists before producing a structured trip brief.
+- `celebration_planner/celebration_orchestrator` (parallel celebration planner) showcases how ADK's `ParallelAgent` can fan out to multiple creative micro-agents at once before synthesising the results.
 
 ## Features
 - **Agent orchestration**: A root assistant delegates to weather, local news, official advisory, and itinerary planning agents.
@@ -12,8 +14,12 @@ The orchestrator, `travel_orchestrator`, coordinates a series of specialised age
 
 ## Project Structure
 ```
+celebration_planner/
+├── agent.py        # Celebration planner showcasing parallel agents
+└── __init__.py
+
 personal_assistant/
-├── agent.py        # Defines orchestrator and specialised agents
+├── agent.py        # Defines travel orchestrator and specialised agents
 ├── tools.py        # Domain-specific tools for weather and safety data
 └── __init__.py
 ```
@@ -27,14 +33,21 @@ personal_assistant/
    ```bash
    export GOOGLE_API_KEY="YOUR_KEY"
    ```
-3. Launch the ADK Dev UI:
+3. Launch the ADK Dev UI (from the repo root so both agents are detected):
    ```bash
-   adk web
+   adk web .
    ```
-4. Interact with the **personal_assistant** application, e.g.:
+4. Interact with the **Personal Assistant** application, e.g.:
    ```
    "Plan a 5-day weekend trip to Sri Lanka starting from Kolkata next Friday."
    ```
+
+### Parallel celebration planner quickstart
+
+Try the new celebration agent to see parallel orchestration in action:
+```
+"I want to throw a cozy-but-fun engagement celebration for 20 guests in a New York loft. Budget $1500, need vegan-friendly bites, and quiet hours start at 11pm."
+```
 
 ## Customisation Ideas
 - Swap in additional fetcher agents (e.g., currency exchange, event calendars).
